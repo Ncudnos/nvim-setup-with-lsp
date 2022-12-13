@@ -10,7 +10,7 @@
     ```
 2. If you're using Linux/Unix:
    
-   - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY THE MY CONFIG
+   - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY OF MY CONFIG
    
    - Clone repo into your computer.
    
@@ -30,7 +30,7 @@
 
 3. If you're using Windows:
    
-   - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY THE MY CONFIG
+   - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY OF MY CONFIG
    
    - Clone repo into your computer.
    
