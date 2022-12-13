@@ -1,5 +1,30 @@
 {
-  "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/15.0.3/clangd_15.0.3/bin/clangd",
-    "diagnostic.virtualText": true,
-  "diagnostic.virtualTextCurrentLineOnly": false
+  "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/15.0.6/clangd_15.0.6/bin/clangd",
+  "suggest.completionItemKindLabels": {
+    "method": "",
+    "function": "",
+    "variable": "[]",
+    "field": "ﰠ",
+    "typeParameter": "<>",
+    "constant": "",
+    "class": "פּ",
+    "interface": "蘒",
+    "struct": "",
+    "event": "",
+    "operator": "",
+    "module": "",
+    "property": "",
+    "enum": "練",
+    "reference": "",
+    "keyword": "",
+    "file": "",
+    "folder": "ﱮ",
+    "color": "",
+    "unit": "塞",
+    "snippet": "",
+    "text": "",
+    "constructor": "",
+    "value": "",
+    "enumMember": ""
+  },
 }
