@@ -8,7 +8,7 @@
   - ```bash
       pip install pyx pynvim
     ```
-1. If you're using Linux/Unix:
+2. If you're using Linux/Unix:
    
    - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY THE MY CONFIG
    
@@ -28,7 +28,7 @@
      :PlugInstall 
      ```
 
-2. If you're using Windows:
+3. If you're using Windows:
    
    - YOU MUST USING [NEOVIM8+](https://neovim.io/) TO USE FULLY THE MY CONFIG
    
