@@ -28,7 +28,6 @@ command! MakeTags !ctags -R .
 call plug#begin()
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'ervandew/supertab' 
-Plug 'neoclide/coc.nvim', {'branch': 'release'} 
 Plug 'norcalli/nvim-colorizer.lua'
 Plug 'nvim-lua/plenary.nvim' 
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
@@ -38,8 +37,31 @@ Plug 'kdheepak/tabline.nvim'
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'numToStr/Comment.nvim'
-Plug 'lifepillar/vim-solarized8'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+" LSP Support
+Plug 'neovim/nvim-lspconfig'
+Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
+
+" Autocompletion
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-nvim-lua'
+
+"  Snippets
+Plug 'L3MON4D3/LuaSnip'
+Plug 'rafamadriz/friendly-snippets'
+
+Plug 'VonHeikemen/lsp-zero.nvim'
+Plug 'tjdevries/colorbuddy.nvim'
+Plug 'svrana/neosolarized.nvim'
+
+" coc-markdown-preview-enhanced
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'rderik/vim-markdown-toc', { 'branch': 'add-anchors-to-headings/drc2r' }
 call plug#end()
 
 nnoremap <C-s> :w<Enter>
@@ -52,33 +74,11 @@ nnoremap <C-d> :%d<Enter>
 nnoremap <C-n> :Telescope file_browser<Enter>
 nnoremap <C-t> :ToggleTerm direction=float<Enter>
 nnoremap <TAB> :bnext<Enter>
+nnoremap <C-f> :%s//g<Left><Left>
 nnoremap <C-y> :noh<Enter>
 nnoremap <silent> vim :e $MYVIMRC<TAB><cr>
 nnoremap <silent> ;; :Telescope oldfiles<cr>
 
-command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-inoremap <silent><expr> <C-x><C-z> coc#pum#visible() ? coc#pum#stop() : "\<C-x>\<C-z>"
-inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-inoremap <silent><expr> <c-space> coc#refresh()
-
-hi CocMenuSel guibg=#005b5b guifg=#e0ffff
-
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-nnoremap <silent> <C-j> :call CocAction('diagnosticNext')<CR>
-
-nnoremap <silent> K :call ShowDocumentation()<CR>
-
-function! ShowDocumentation()
-    if CocAction('hasProvider', 'hover')
-        call CocActionAsync('doHover')
-    else
-        call feedkeys('K', 'in')
-    endif
-endfunction
 
 " Find files using Telescope command-line sugar.
 nnoremap <silent>;f <cmd>Telescope find_files<cr>
@@ -87,31 +87,20 @@ nnoremap <silent>;h <cmd>Telescope help_tags<cr>
 nnoremap <silent>sf <cmd>Telescope file_browser<cr>
 
 
-let g:coc_global_extensions = [
-            \ 'coc-html',
-            \ 'coc-css',
-            \ 'coc-highlight',
-            \ 'coc-eslint',
-            \ 'coc-prettier',
-            \ 'coc-pyright',
-            \ 'coc-emmet',
-            \ 'coc-pairs',
-            \ 'coc-snippets',
-            \ 'coc-java',
-            \ 'coc-tsserver',
-            \ 'coc-clangd',
-            \ 'coc-json',
-            \ ]
+" let g:coc_global_extensions = [
+"             \ 'coc-markdown-preview-enhanced',
+"             \ 'coc-webview',
+"             \ ]
 
 if exists("&termguicolors") && exists("&winblend")
     syntax enable
     set termguicolors
-    set winblend=15
+    set winblend=5
     set wildoptions=pum
-    set pumblend=20
-    let g:solarized_termtrans=1
+    set pumblend=10
+    " let g:solarized_termtrans=1
     set background=dark
-    colorscheme solarized8
+    " colorscheme solarized8
 endif
 
 lua << EOF
@@ -120,7 +109,7 @@ lua << EOF
 require("telescope").setup {
     extensions = {
         file_browser = {
-            previewer=false,
+            previewer=true,
             theme = "dropdown",
             -- disables netrw and use telescope-file-browser in its place
             hijack_netrw = true,
@@ -211,6 +200,10 @@ require('lualine').setup {
 EOF
 
 lua << EOF
+require 'Comment'.setup{}
+EOF
+
+lua << EOF
 require 'colorizer'.setup{
       '*'; -- Highlight all files, but customize some others.
 }
@@ -261,3 +254,45 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 
+lua <<EOF
+local lsp = require('lsp-zero')
+lsp.preset('recommended')
+
+lsp.setup()
+
+lsp.set_preferences({
+  suggest_lsp_servers = true,
+  setup_servers_on_start = true,
+  set_lsp_keymaps = true,
+  configure_diagnostics = true,
+  cmp_capabilities = true,
+  manage_nvim_cmp = true,
+  call_servers = 'local',
+  sign_icons = {
+    error = '✘',
+    warn = '▲',
+    hint = '⚑',
+    info = ''
+  }
+})
+
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = true,
+  update_in_insert = false,
+  underline = true,
+  severity_sort = false,
+  float = true,
+})
+
+EOF
+
+lua << EOF
+  require('neosolarized').setup({
+    comment_italics = true,
+    background_set = false,
+  })
+EOF
+
+let g:vmt_insert_anchors = 1
+let g:vmt_auto_update_on_save = 1
