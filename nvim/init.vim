@@ -26,44 +26,19 @@ set background=dark
 command! MakeTags !ctags -R .
 
 call plug#begin()
-Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'ervandew/supertab' 
-Plug 'norcalli/nvim-colorizer.lua'
 Plug 'nvim-lua/plenary.nvim' 
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
-Plug 'nvim-lualine/lualine.nvim' 
 Plug 'kyazdani42/nvim-web-devicons' 
-Plug 'kdheepak/tabline.nvim'
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'numToStr/Comment.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-" LSP Support
-Plug 'neovim/nvim-lspconfig'
-Plug 'williamboman/mason.nvim'
-Plug 'williamboman/mason-lspconfig.nvim'
-
-" Autocompletion
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-path'
-Plug 'saadparwaiz1/cmp_luasnip'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-nvim-lua'
-
-"  Snippets
-Plug 'L3MON4D3/LuaSnip'
-Plug 'rafamadriz/friendly-snippets'
-
-Plug 'VonHeikemen/lsp-zero.nvim'
-Plug 'tjdevries/colorbuddy.nvim'
-Plug 'svrana/neosolarized.nvim'
-
-" coc-markdown-preview-enhanced
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-Plug 'rderik/vim-markdown-toc', { 'branch': 'add-anchors-to-headings/drc2r' }
-
-Plug 'windwp/nvim-autopairs'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'ryanoasis/vim-devicons'
+Plug 'lifepillar/vim-solarized8'
 call plug#end()
 
 nnoremap <C-s> :w<Enter>
@@ -88,11 +63,23 @@ nnoremap <silent>;g <cmd>Telescope live_grep<cr>
 nnoremap <silent>;h <cmd>Telescope help_tags<cr>
 nnoremap <silent>sf <cmd>Telescope file_browser<cr>
 
-
-" let g:coc_global_extensions = [
-"             \ 'coc-markdown-preview-enhanced',
-"             \ 'coc-webview',
-"             \ ]
+let g:coc_global_extensions = [
+            \ 'coc-markdown-preview-enhanced',
+            \ 'coc-webview',
+            \ 'coc-clangd',
+            \ 'coc-html',
+            \ 'coc-css',
+            \ 'coc-eslint',
+            \ 'coc-json',
+            \ 'coc-java',
+            \ 'coc-tsserver',
+            \ 'coc-pairs',
+            \ 'coc-snippets',
+            \ 'coc-prettier',
+            \ 'coc-highlight',
+            \ 'coc-ultisnips',
+            \ 'coc-git',
+            \ ]
 
 if exists("&termguicolors") && exists("&winblend")
     syntax enable
@@ -100,9 +87,9 @@ if exists("&termguicolors") && exists("&winblend")
     set winblend=10
     set wildoptions=pum
     set pumblend=20
-    " let g:solarized_termtrans=1
+    let g:solarized_termtrans=1
     set background=dark
-    " colorscheme solarized8
+    colorscheme solarized8
 endif
 
 lua << EOF
@@ -153,87 +140,7 @@ telescope.load_extension("file_browser")
 EOF
 
 lua << EOF
-require'tabline'.setup {
-    enable = true,
-    options = {
-        section_separators = {'', ''},
-        component_separators = {'', ''},
-        max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
-        show_tabs_always = false, -- this shows tabs only when there are more than one tab or if the first tab is named
-        show_devicons = true, -- this shows devicons in buffer section
-        show_bufnr = false, -- this appends [bufnr] to buffer section,
-        show_filename_only = true, -- shows base filename only instead of relative path in filename
-        modified_icon = "[*]", -- change the default modified icon
-        modified_italic = true, -- set to true by default; this determines whether the filename turns italic if modified
-        show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
-    }
-    }
-requires = { { 'hoob3rt/lualine.nvim', opt=true }, {'kyazdani42/nvim-web-devicons', opt = true} }
-EOF
-
-lua<<EOF
-require("toggleterm").setup{
-}
-EOF
-
-lua<<EOF
-require('lualine').setup {
-    options = {
-        icons_enabled = true,
-        theme = 'solarized_dark',
-        component_separators = { left = '', right = ''},
-        section_separators = { left = '', right = ''},
-        disabled_filetypes = {
-            statusline = {},
-            winbar = {},
-        },
-        ignore_focus = {},
-        always_divide_middle = true,
-        globalstatus = false,
-        refresh = {
-            statusline = 1000,
-            tabline = 1000,
-            winbar = 1000,
-        }
-        },
-    sections = {
-        lualine_a = {'mode'},
-        lualine_b = {'branch', 'diff',},
-        lualine_c = { {
-            'filename',
-        } },
-        lualine_x = {
-            { 'diagnostics', sources = { "nvim_diagnostic" }, symbols = { error = ' ', warn = ' ', info = ' ',
-            hint = ' ' } },
-            'encoding',
-            'filetype',
-            'fileformat',
-        },
-        lualine_y = {'progress'},
-        lualine_z = {'location'}
-    },
-    inactive_sections = {
-        lualine_a = {},
-        lualine_b = {},
-        lualine_c = {'filename'},
-        lualine_x = {'location'},
-        lualine_y = {},
-        lualine_z = {}
-    },
-    tabline = {},
-    extensions = {}
-}
-
-EOF
-
-lua << EOF
 require 'Comment'.setup{}
-EOF
-
-lua << EOF
-require 'colorizer'.setup{
-      '*'; -- Highlight all files, but customize some others.
-}
 EOF
 
 lua<<EOF
@@ -281,49 +188,53 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 
-lua <<EOF
-local lsp = require('lsp-zero')
-lsp.preset('recommended')
+"" Map Ctrl + Space để show list functions/biến autocomplete
+inoremap <silent><expr> <c-space> coc#refresh()
 
-lsp.setup()
+"" Tự động import file của biến/function khi chọn và nhấn Tab
+inoremap <expr> <TAB> pumvisible() ? "\<C-y>" : "\<C-g>u\<TAB>"
 
-lsp.set_preferences({
-  suggest_lsp_servers = true,
-  setup_servers_on_start = true,
-  set_lsp_keymaps = true,
-  configure_diagnostics = true,
-  cmp_capabilities = true,
-  manage_nvim_cmp = true,
-  call_servers = 'local',
-  sign_icons = {
-    error = '✘',
-    warn = '▲',
-    hint = '⚑',
-    info = ''
-  }
-})
+"" Go to definition ở tab mới
+nmap <silent> gd :call CocAction('jumpDefinition', 'tab drop')<CR>
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 
-vim.diagnostic.config({
-  virtual_text = true,
-  signs = true,
-  update_in_insert = false,
-  underline = true,
-  severity_sort = false,
-  float = true,
-})
+nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-EOF
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
 
-lua << EOF
-  require('neosolarized').setup({
-    comment_italics = true,
-    background_set = false,
-  })
-EOF
+autocmd CursorHold * silent call CocActionAsync('highlight')
 
-let g:vmt_insert_anchors = 1
-let g:vmt_auto_update_on_save = 1
+let g:airline_theme='solarized'
+let g:airline_powerline_fonts=1
 
-lua << EOF
-require("nvim-autopairs").setup {}
-EOF
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+  
+"" powerline symbols
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = 'ln'
+let g:airline_symbols.maxlinenr = ''
+let g:airline_symbols.dirty='⚡'
+let g:airline_symbols.colnr='col'"
+
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#hunks#enabled=1
+let g:airline#extensions#hunks#coc_git = 1
+
+
