@@ -223,3 +223,8 @@ let g:airline_symbols.colnr='col'"
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#hunks#enabled=1
 let g:airline#extensions#hunks#coc_git = 1
+
+lua << EOF
+require'lspconfig'.clangd.setup{}
+EOF
+
