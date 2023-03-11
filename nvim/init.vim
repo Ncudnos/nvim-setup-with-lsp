@@ -1,6 +1,7 @@
 set number
 set autochdir
 set undofile
+set signcolumn=yes
 set ruler
 set cursorline
 syntax on
@@ -26,6 +27,7 @@ set background=dark
 command! MakeTags !ctags -R .
 
 call plug#begin()
+
 Plug 'ervandew/supertab' 
 Plug 'nvim-lua/plenary.nvim' 
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
@@ -34,12 +36,42 @@ Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'numToStr/Comment.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'ryanoasis/vim-devicons'
 Plug 'lifepillar/vim-solarized8'
+
+" LSP Support
+Plug 'neovim/nvim-lspconfig'             " Required
+Plug 'williamboman/mason.nvim'           " Optional
+Plug 'williamboman/mason-lspconfig.nvim' " Optional
+
+" Autocompletion Engine
+Plug 'hrsh7th/nvim-cmp'         " Required
+Plug 'hrsh7th/cmp-nvim-lsp'     " Required
+Plug 'hrsh7th/cmp-buffer'       " Optional
+Plug 'hrsh7th/cmp-path'         " Optional
+Plug 'saadparwaiz1/cmp_luasnip' " Optional
+Plug 'hrsh7th/cmp-nvim-lua'     " Optional
+
+"  Snippets
+Plug 'L3MON4D3/LuaSnip'             " Required
+Plug 'rafamadriz/friendly-snippets' " Optional
+
+Plug 'VonHeikemen/lsp-zero.nvim', {'branch': 'v1.x'}
+
 call plug#end()
+
+lua <<EOF
+local lsp = require('lsp-zero').preset({
+  name = 'minimal',
+  set_lsp_keymaps = true,
+  manage_nvim_cmp = true,
+  suggest_lsp_servers = false,
+})
+
+lsp.setup()
+EOF
 
 nnoremap <C-s> :w<Enter>
 nnoremap <C-a> ggVG
@@ -56,30 +88,11 @@ nnoremap <C-y> :noh<Enter>
 nnoremap <silent> vim :e $MYVIMRC<TAB><cr>
 nnoremap <silent> ;; :Telescope oldfiles<cr>
 
-
 " Find files using Telescope command-line sugar.
 nnoremap <silent>;f <cmd>Telescope find_files<cr>
 nnoremap <silent>;g <cmd>Telescope live_grep<cr>
 nnoremap <silent>;h <cmd>Telescope help_tags<cr>
 nnoremap <silent>sf <cmd>Telescope file_browser<cr>
-
-let g:coc_global_extensions = [
-            \ 'coc-markdown-preview-enhanced',
-            \ 'coc-webview',
-            \ 'coc-clangd',
-            \ 'coc-html',
-            \ 'coc-css',
-            \ 'coc-eslint',
-            \ 'coc-json',
-            \ 'coc-java',
-            \ 'coc-tsserver',
-            \ 'coc-pairs',
-            \ 'coc-snippets',
-            \ 'coc-prettier',
-            \ 'coc-highlight',
-            \ 'coc-ultisnips',
-            \ 'coc-git',
-            \ ]
 
 if exists("&termguicolors") && exists("&winblend")
     syntax enable
@@ -188,32 +201,6 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 
-"" Map Ctrl + Space để show list functions/biến autocomplete
-inoremap <silent><expr> <c-space> coc#refresh()
-
-"" Tự động import file của biến/function khi chọn và nhấn Tab
-inoremap <expr> <TAB> pumvisible() ? "\<C-y>" : "\<C-g>u\<TAB>"
-
-"" Go to definition ở tab mới
-nmap <silent> gd :call CocAction('jumpDefinition', 'tab drop')<CR>
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
-    call CocActionAsync('doHover')
-  else
-    execute '!' . &keywordprg . " " . expand('<cword>')
-  endif
-endfunction
-
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
 let g:airline_theme='solarized'
 let g:airline_powerline_fonts=1
 
@@ -236,5 +223,3 @@ let g:airline_symbols.colnr='col'"
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#hunks#enabled=1
 let g:airline#extensions#hunks#coc_git = 1
-
-
