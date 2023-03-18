@@ -59,7 +59,9 @@ Plug 'L3MON4D3/LuaSnip'             " Required
 Plug 'rafamadriz/friendly-snippets' " Optional
 
 Plug 'VonHeikemen/lsp-zero.nvim', {'branch': 'v1.x'}
-
+Plug 'windwp/nvim-autopairs'
+Plug 'iamcco/markdown-preview.nvim'
+Plug 'mzlogin/vim-markdown-toc'
 call plug#end()
 
 lua <<EOF
@@ -226,5 +228,9 @@ let g:airline#extensions#hunks#coc_git = 1
 
 lua << EOF
 require'lspconfig'.clangd.setup{}
+EOF
+
+lua << EOF
+require("nvim-autopairs").setup {}
 EOF
 
