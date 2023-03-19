@@ -234,3 +234,7 @@ lua << EOF
 require("nvim-autopairs").setup {}
 EOF
 
+let g:vmt_insert_anchors = 1
+let g:vmt_auto_update_on_save = 1
+
+
