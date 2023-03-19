@@ -91,3 +91,7 @@ nvim
 ```
 
 </div>
+
+### 6. If you like `coc.nvim`
+
+- I have another repo using `Coc.nvim` for setting up my Neovim. You can go to [LINK}(https://github.com/ncudnos/nvim-setup-with-coc)
