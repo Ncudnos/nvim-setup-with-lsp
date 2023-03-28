@@ -62,6 +62,8 @@ Plug 'VonHeikemen/lsp-zero.nvim', {'branch': 'v1.x'}
 Plug 'windwp/nvim-autopairs'
 Plug 'iamcco/markdown-preview.nvim'
 Plug 'mzlogin/vim-markdown-toc'
+
+Plug 'norcalli/nvim-colorizer.lua'
 call plug#end()
 
 lua <<EOF
@@ -168,7 +170,7 @@ require'nvim-treesitter.configs'.setup {
 
   -- Automatically install missing parsers when entering buffer
   -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-  auto_install = true,
+  auto_install = false,
 
   -- List of parsers to ignore installing (for "all")
   ignore_install = { "javascript" },
@@ -237,4 +239,6 @@ EOF
 let g:vmt_insert_anchors = 1
 let g:vmt_auto_update_on_save = 1
 
-
+lua << EOF
+require'colorizer'.setup()
+EOF
