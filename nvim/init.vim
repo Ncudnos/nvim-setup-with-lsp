@@ -68,7 +68,7 @@ Plug 'nvim-lualine/lualine.nvim'
 " If you want to have icons in your statusline choose one of these
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'kdheepak/tabline.nvim'
-
+Plug 'onsails/lspkind-nvim'
 
 call plug#end()
 
@@ -107,10 +107,11 @@ nnoremap <silent>sf <cmd>Telescope file_browser<cr>
 if exists("&termguicolors") && exists("&winblend")
     syntax enable
     set termguicolors
-    set winblend=10
+    set winblend=5
     set wildoptions=pum
-    set pumblend=20
+    set pumblend=5
     set background=dark
+    colorscheme tokyonight-storm
 endif
 
 lua << EOF
@@ -209,13 +210,6 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 
-let g:airline_theme='solarized'
-let g:airline_powerline_fonts=1
-
-if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
-endif
-
 lua << EOF
 require("nvim-autopairs").setup {}
 EOF
@@ -281,51 +275,10 @@ EOF
 
 lua << EOF
 
-local status, n = pcall(require, "neosolarized")
-if (not status) then return end
-
-n.setup({
-  comment_italics = true,
-})
-
-local cb = require('colorbuddy.init')
-local Color = cb.Color
-local colors = cb.colors
-local Group = cb.Group
-local groups = cb.groups
-local styles = cb.styles
-
-Color.new('white', '#ffffff')
-Color.new('black', '#000000')
-Group.new('Normal', colors.base1, colors.NONE, styles.NONE)
-Group.new('CursorLine', colors.none, colors.base03, styles.NONE, colors.base1)
-Group.new('CursorLineNr', colors.yellow, colors.black, styles.NONE, colors.base1)
-Group.new('Visual', colors.none, colors.base03, styles.reverse)
-
-local cError = groups.Error.fg
-local cInfo = groups.Information.fg
-local cWarn = groups.Warning.fg
-local cHint = groups.Hint.fg
-
-Group.new("DiagnosticVirtualTextError", cError, cError:dark():dark():dark():dark(), styles.NONE)
-Group.new("DiagnosticVirtualTextInfo", cInfo, cInfo:dark():dark():dark(), styles.NONE)
-Group.new("DiagnosticVirtualTextWarn", cWarn, cWarn:dark():dark():dark(), styles.NONE)
-Group.new("DiagnosticVirtualTextHint", cHint, cHint:dark():dark():dark(), styles.NONE)
-Group.new("DiagnosticUnderlineError", colors.none, colors.none, styles.undercurl, cError)
-Group.new("DiagnosticUnderlineWarn", colors.none, colors.none, styles.undercurl, cWarn)
-Group.new("DiagnosticUnderlineInfo", colors.none, colors.none, styles.undercurl, cInfo)
-Group.new("DiagnosticUnderlineHint", colors.none, colors.none, styles.undercurl, cHint)
-
-Group.new("HoverBorder", colors.yellow, colors.none, styles.NONE)
-
-EOF
-
-lua << EOF
-
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme = 'solarized_dark',
+    theme = 'tokyonight',
     component_separators = { left = '', right = ''},
     section_separators = { left = '', right = ''},
     disabled_filetypes = {
@@ -343,8 +296,8 @@ require('lualine').setup {
   },
   sections = {
     lualine_a = {'mode'},
-    lualine_b = {'branch', 'diff', 'diagnostics'},
-    lualine_c = {'filename'},
+    lualine_b = {'branch', 'diff'},
+    lualine_c = {'filename', 'diagnostics'},
     lualine_x = {'encoding', 'fileformat', 'filetype'},
     lualine_y = {'progress'},
     lualine_z = {'location'}
@@ -378,10 +331,89 @@ require'tabline'.setup {
         show_bufnr = false, -- this appends [bufnr] to buffer section,
         show_filename_only = false, -- shows base filename only instead of relative path in filename
         modified_icon = "+ ", -- change the default modified icon
-        modified_italic = false, -- set to true by default; this determines whether the filename turns italic if modified
+        modified_italic = true, -- set to true by default; this determines whether the filename turns italic if modified
         show_tabs_only = false, -- this shows only tabs instead of tabs + buffers
       }
     }
 
 EOF
 
+lua << EOF
+
+local status, cmp = pcall(require, "cmp")
+if (not status) then return end
+local lspkind = require 'lspkind'
+
+local function formatForTailwindCSS(entry, vim_item)
+  if vim_item.kind == 'Color' and entry.completion_item.documentation then
+    local _, _, r, g, b = string.find(entry.completion_item.documentation, '^rgb%((%d+), (%d+), (%d+)')
+    if r then
+      local color = string.format('%02x', r) .. string.format('%02x', g) .. string.format('%02x', b)
+      local group = 'Tw_' .. color
+      if vim.fn.hlID(group) < 1 then
+        vim.api.nvim_set_hl(0, group, { fg = '#' .. color })
+      end
+      vim_item.kind = "●"
+      vim_item.kind_hl_group = group
+      return vim_item
+    end
+  end
+  vim_item.kind = lspkind.symbolic(vim_item.kind) and lspkind.symbolic(vim_item.kind) or vim_item.kind
+  return vim_item
+end
+
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+  }),
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'buffer' },
+  }),
+  formatting = {
+    format = lspkind.cmp_format({
+      maxwidth = 50,
+      before = function(entry, vim_item)
+        vim_item = formatForTailwindCSS(entry, vim_item)
+        return vim_item
+      end
+    })
+  }
+})
+
+vim.cmd [[
+  set completeopt=menuone,noinsert,noselect
+  highlight! default link CmpItemKind CmpItemMenuDefault
+]]
+
+EOF
+
+lua << EOF
+
+local status, lspkind = pcall(require, "lspkind")
+if (not status) then return end
+
+lspkind.init({
+  -- enables text annotations
+  --
+  -- default: true
+  mode = 'symbol',
+
+  -- default symbol map
+  -- can be either 'default' (requires nerd-fonts font) or
+  -- 'codicons' for codicon preset (requires vscode-codicons font)
+  --
+  -- default: 'default'
+  preset = 'default',
+
+  -- override preset symbols
+  --
+  -- default: {}
+  symbol_map = {}
+})
+
+EOF
