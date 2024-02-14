@@ -2,6 +2,8 @@ set number
 set autochdir
 set undofile
 set signcolumn=yes
+set spelllang=en_gb
+set spell
 set ruler
 set cursorline
 syntax on
@@ -29,8 +31,8 @@ command! MakeTags !ctags -R .
 call plug#begin()
 
 Plug 'ervandew/supertab' 
+Plug 'craftzdog/solarized-osaka.nvim'
 Plug 'nvim-lua/plenary.nvim' 
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' } 
 Plug 'kyazdani42/nvim-web-devicons' 
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'nvim-telescope/telescope-file-browser.nvim'
@@ -45,14 +47,9 @@ Plug 'williamboman/mason-lspconfig.nvim' " Optional
 " Autocompletion Engine
 Plug 'hrsh7th/nvim-cmp'         " Required
 Plug 'hrsh7th/cmp-nvim-lsp'     " Required
-Plug 'hrsh7th/cmp-buffer'       " Optional
-Plug 'hrsh7th/cmp-path'         " Optional
-Plug 'saadparwaiz1/cmp_luasnip' " Optional
-Plug 'hrsh7th/cmp-nvim-lua'     " Optional
 
 "  Snippets
 Plug 'L3MON4D3/LuaSnip'             " Required
-Plug 'rafamadriz/friendly-snippets' " Optional
 
 Plug 'VonHeikemen/lsp-zero.nvim', {'branch': 'v1.x'}
 Plug 'windwp/nvim-autopairs'
@@ -60,9 +57,6 @@ Plug 'iamcco/markdown-preview.nvim'
 Plug 'mzlogin/vim-markdown-toc'
 
 Plug 'norcalli/nvim-colorizer.lua'
-
-Plug 'tjdevries/colorbuddy.nvim'
-Plug 'svrana/neosolarized.nvim'
 
 Plug 'nvim-lualine/lualine.nvim'
 " If you want to have icons in your statusline choose one of these
@@ -91,7 +85,6 @@ nnoremap <C-w> :q!<Enter>
 nnoremap <C-z> :u<Enter>
 nnoremap <C-d> :%d<Enter>
 nnoremap <C-n> :Telescope file_browser<Enter>
-nnoremap <C-t> :ToggleTerm direction=float<Enter>
 nnoremap <TAB> :bnext<Enter>
 nnoremap <C-f> :%s//g<Left><Left>
 nnoremap <C-y> :noh<Enter>
@@ -107,11 +100,11 @@ nnoremap <silent>sf <cmd>Telescope file_browser<cr>
 if exists("&termguicolors") && exists("&winblend")
     syntax enable
     set termguicolors
-    set winblend=5
+    set winblend=10
     set wildoptions=pum
-    set pumblend=5
+    set pumblend=10
     set background=dark
-    colorscheme tokyonight-storm
+    colorscheme solarized-osaka
 endif
 
 lua << EOF
@@ -167,32 +160,13 @@ EOF
 
 lua<<EOF
 require'nvim-treesitter.configs'.setup {
-  -- A list of parser names, or "all"
   ensure_installed = { "c", "lua", "rust", "cpp", "html", "css", "python" },
-
-  -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
-
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
   auto_install = false,
-
-  -- List of parsers to ignore installing (for "all")
   ignore_install = { "javascript" },
-
-  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
-
   highlight = {
-    -- `false` will disable the whole extension
     enable = true,
-
-    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
-    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
-    -- the name of the parser)
-    -- list of language that will be disabled
     disable = { "c", "rust" },
-    -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
     disable = function(lang, buf)
         local max_filesize = 100 * 1024 -- 100 KB
         local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
@@ -200,11 +174,6 @@ require'nvim-treesitter.configs'.setup {
             return true
         end
     end,
-
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
     additional_vim_regex_highlighting = false,
   },
 }
@@ -223,26 +192,15 @@ EOF
 
 lua << EOF
 
--- Setup language servers.
 local lspconfig = require('lspconfig')
-
--- Global mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
 vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
-
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   callback = function(ev)
-    -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
@@ -278,7 +236,7 @@ lua << EOF
 require('lualine').setup {
   options = {
     icons_enabled = true,
-    theme = 'tokyonight',
+    theme = 'solarized_dark',
     component_separators = { left = '', right = ''},
     section_separators = { left = '', right = ''},
     disabled_filetypes = {
@@ -318,11 +276,8 @@ require('lualine').setup {
 
 
 require'tabline'.setup {
-      -- Defaults configuration options
       enable = true,
       options = {
-      -- If lualine is installed tabline will use separators configured in lualine by default.
-      -- These options can be used to override those settings.
         section_separators = {'', ''},
         component_separators = {'', ''},
         max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
